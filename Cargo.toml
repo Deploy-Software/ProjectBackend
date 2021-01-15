@@ -1,0 +1,19 @@
+[package]
+name = "project"
+version = "0.1.0"
+authors = ["Axel Nilsson <theaxelnilsson@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-graphql = "2.4.7"
+async-graphql-warp = "2.4.7"
+tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
+warp = "0.2"
+serde_json = "1.0"
+serde_derive = "1.0"
+serde = "1.0"
+futures = "0.3"
+sqlx = { version = "0.4.2", features = ["postgres", "migrate", "offline", "chrono", "runtime-tokio-rustls"] }
+
