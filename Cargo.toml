@@ -16,4 +16,5 @@ serde_derive = "1.0"
 serde = "1.0"
 futures = "0.3"
 sqlx = { version = "0.4.2", features = ["postgres", "migrate", "offline", "chrono", "runtime-tokio-rustls"] }
-
+chrono = { version = "0.4.19", features = ["serde"] }
+regex = "1.4.3"

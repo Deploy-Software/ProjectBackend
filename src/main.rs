@@ -5,6 +5,7 @@ use std::convert::Infallible;
 use std::env;
 use warp::Filter;
 
+mod records;
 mod routes;
 mod schema;
 
@@ -14,7 +15,6 @@ pub struct AuthToken(String);
 pub struct QueryRoot;
 pub struct MutationRoot;
 pub struct SubscriptionRoot;
-pub struct MyToken(String);
 
 pub async fn db_connection() -> Result<PgPool> {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL NOT FOUND");
@@ -39,7 +39,7 @@ async fn main() {
                 async_graphql::Request,
             )| async move {
                 if let Some(token) = token {
-                    request = request.data(MyToken(token));
+                    request = request.data(AuthToken(token));
                 }
                 let resp = schema.execute(request).await;
                 Ok::<_, Infallible>(Response::from(resp))
@@ -60,7 +60,7 @@ async fn main() {
 
             if let Ok(payload) = serde_json::from_value::<Payload>(value) {
                 let mut data = Data::default();
-                data.insert(MyToken(payload.token));
+                data.insert(AuthToken(payload.token));
                 Ok(data)
             } else {
                 Err("Token is required".into())
