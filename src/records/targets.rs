@@ -1,7 +1,7 @@
 use async_graphql::{Error, Result, SimpleObject};
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{postgres::PgDone, PgPool};
 
 #[derive(sqlx::FromRow, SimpleObject, Debug, Deserialize, Serialize, Clone)]
 pub struct SimpleTarget {
@@ -9,6 +9,25 @@ pub struct SimpleTarget {
     pub project_id: i32,
     pub name: String,
     pub date: DateTime<chrono::Utc>,
+}
+
+impl<'a> SimpleTarget {
+    pub async fn insert_value(&self, pg_pool: &PgPool, value: &'a str) -> Result<PgDone> {
+        match sqlx::query!(
+            "INSERT INTO target_values (target_id, value) VALUES ($1, $2)",
+            &self.id,
+            &value,
+        )
+        .execute(pg_pool)
+        .await
+        {
+            Ok(done) => Ok(done),
+            Err(error) => {
+                println!("{}", error.to_string());
+                Err(Error::from("Unable to insert target value in database."))
+            }
+        }
+    }
 }
 
 #[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]

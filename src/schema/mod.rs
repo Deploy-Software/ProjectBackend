@@ -62,8 +62,9 @@ impl MutationRoot {
         ctx: &'a Context<'_>,
         project_id: i32,
         name: String,
+        value: String,
     ) -> Result<&'a str> {
-        targets::new(ctx, project_id, name).await
+        targets::new(ctx, project_id, name, value).await
     }
 }
 
