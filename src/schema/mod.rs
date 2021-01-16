@@ -28,7 +28,7 @@ impl MutationRoot {
         ctx: &'a Context<'_>,
         email: String,
         password: String,
-    ) -> Result<&'a str> {
+    ) -> Result<String> {
         authorization::sign_in(ctx, email, password).await
     }
 

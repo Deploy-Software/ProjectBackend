@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 pub mod password;
+pub mod session;
 
 #[derive(sqlx::FromRow, SimpleObject, Debug, Deserialize, Serialize, Clone)]
 pub struct SimpleUser {
