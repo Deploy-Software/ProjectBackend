@@ -96,6 +96,15 @@ impl MutationRoot {
     ) -> Result<&'a str> {
         tasks::new(ctx, target_id, name, about).await
     }
+
+    async fn new_task_activity<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        task_id: i32,
+        text: String,
+    ) -> Result<&'a str> {
+        tasks::new_activity(ctx, task_id, text).await
+    }
 }
 
 #[Subscription]

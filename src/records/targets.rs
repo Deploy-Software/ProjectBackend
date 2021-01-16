@@ -152,7 +152,7 @@ impl<'a> NewActivity<'a> {
             Ok(done) => Ok(done),
             Err(error) => {
                 println!("{}", error.to_string());
-                Err(Error::from("Unable to insert activity in database."))
+                Err(Error::from("Unable to insert target activity in database."))
             }
         }
     }
