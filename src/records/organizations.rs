@@ -23,7 +23,7 @@ impl<'a> SimpleOrganization {
             Ok(done) => Ok(done),
             Err(error) => {
                 println!("{}", error.to_string());
-                Err(Error::from("Unable to add user to organization"))
+                Err(Error::from("Unable to add user to organization."))
             }
         }
     }
@@ -55,7 +55,7 @@ impl<'a> NewOrganization<'a> {
             Ok(organization) => Ok(organization),
             Err(error) => {
                 println!("{}", error.to_string());
-                Err(Error::from("Unable to insert organization in database"))
+                Err(Error::from("Unable to insert organization in database."))
             }
         }
     }

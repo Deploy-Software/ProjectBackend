@@ -18,3 +18,4 @@ futures = "0.3"
 sqlx = { version = "0.4.2", features = ["postgres", "migrate", "offline", "chrono", "runtime-tokio-rustls"] }
 chrono = { version = "0.4.19", features = ["serde"] }
 regex = "1.4.3"
+bcrypt = "0.9.0"

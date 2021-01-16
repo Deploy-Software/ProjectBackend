@@ -24,11 +24,14 @@ pub async fn db_connection() -> Result<PgPool> {
 #[tokio::main]
 async fn main() {
     let pg_pool: PgPool = db_connection().await.expect("Database connection failed.");
+    sqlx::migrate!()
+        .run(&pg_pool)
+        .await
+        .expect("Database migrations failed");
+
     let schema = Schema::build(QueryRoot, MutationRoot, SubscriptionRoot)
         .data(pg_pool)
         .finish();
-
-    println!("Playground: http://localhost:8000");
 
     let graphql_post = warp::header::optional::<String>("token")
         .and(async_graphql_warp::graphql(schema.clone()))
