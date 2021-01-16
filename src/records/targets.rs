@@ -8,6 +8,8 @@ pub struct SimpleTarget {
     pub id: i32,
     pub project_id: i32,
     pub name: String,
+    pub about: Option<String>,
+    pub created_by: i32,
     pub date: DateTime<chrono::Utc>,
 }
 
@@ -32,25 +34,39 @@ impl<'a> SimpleTarget {
 
 #[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
 pub struct NewTarget<'a> {
-    pub project_id: i32,
-    pub name: &'a str,
+    project_id: i32,
+    name: &'a str,
+    about: Option<String>,
+    created_by: i32,
 }
 
 impl<'a> NewTarget<'a> {
-    pub fn make(project_id: i32, name: &'a str) -> Result<Self> {
+    pub fn make(
+        project_id: i32,
+        name: &'a str,
+        about: Option<String>,
+        created_by: i32,
+    ) -> Result<Self> {
         if name.len() == 0 {
             return Err(Error::from("Target name is too short."));
         }
 
-        Ok(NewTarget { project_id, name })
+        Ok(NewTarget {
+            project_id,
+            name,
+            about,
+            created_by,
+        })
     }
 
     pub async fn insert(&self, pg_pool: &PgPool) -> Result<SimpleTarget> {
         match sqlx::query_as!(
             SimpleTarget,
-            "INSERT INTO targets (project_id, name) VALUES ($1, $2) RETURNING id, project_id, name, date",
+            "INSERT INTO targets (project_id, name, about, created_by) VALUES ($1, $2, $3, $4) RETURNING id, project_id, name, about, created_by, date",
             &self.project_id,
             &self.name,
+            self.about: Option<String>,
+            self.created_by
         )
         .fetch_one(pg_pool)
         .await
@@ -59,6 +75,45 @@ impl<'a> NewTarget<'a> {
             Err(error) => {
                 println!("{}", error.to_string());
                 Err(Error::from("Unable to insert target in database."))
+            }
+        }
+    }
+}
+
+#[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
+pub struct NewComment<'a> {
+    target_id: i32,
+    text: &'a str,
+    created_by: i32,
+}
+
+impl<'a> NewComment<'a> {
+    pub fn make(target_id: i32, text: &'a str, created_by: i32) -> Result<Self> {
+        if text.len() == 0 {
+            return Err(Error::from("Comment is too short."));
+        }
+
+        Ok(NewComment {
+            target_id,
+            text,
+            created_by,
+        })
+    }
+
+    pub async fn insert(&self, pg_pool: &PgPool) -> Result<PgDone> {
+        match sqlx::query!(
+            "INSERT INTO target_comments (target_id, text, created_by) VALUES ($1, $2, $3)",
+            &self.target_id,
+            &self.text,
+            self.created_by
+        )
+        .execute(pg_pool)
+        .await
+        {
+            Ok(done) => Ok(done),
+            Err(error) => {
+                println!("{}", error.to_string());
+                Err(Error::from("Unable to insert comment in database."))
             }
         }
     }

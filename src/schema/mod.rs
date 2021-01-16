@@ -62,9 +62,19 @@ impl MutationRoot {
         ctx: &'a Context<'_>,
         project_id: i32,
         name: String,
+        about: Option<String>,
         value: String,
     ) -> Result<&'a str> {
-        targets::new(ctx, project_id, name, value).await
+        targets::new(ctx, project_id, name, about, value).await
+    }
+
+    async fn new_target_comment<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        target_id: i32,
+        text: String,
+    ) -> Result<&'a str> {
+        targets::new_comment(ctx, target_id, text).await
     }
 }
 
