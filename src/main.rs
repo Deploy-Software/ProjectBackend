@@ -1,3 +1,12 @@
+#![forbid(unsafe_code)]
+#![deny(clippy::all)]
+#![deny(clippy::correctness)]
+#![deny(clippy::style)]
+#![deny(clippy::complexity)]
+#![deny(clippy::perf)]
+#![deny(clippy::pedantic)]
+#![deny(clippy::nursery)]
+
 use async_graphql::{Data, Schema};
 use async_graphql_warp::{graphql_subscription_with_data, Response};
 use sqlx::postgres::PgPool;
