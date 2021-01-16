@@ -4,6 +4,8 @@ use futures::{stream, Stream};
 
 mod authorization;
 mod organizations;
+mod projects;
+mod targets;
 mod users;
 
 #[Object]
@@ -44,6 +46,24 @@ impl MutationRoot {
 
     async fn new_organization<'a>(&self, ctx: &'a Context<'_>, name: String) -> Result<&'a str> {
         organizations::new(ctx, name).await
+    }
+
+    async fn new_project<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        organization_id: i32,
+        name: String,
+    ) -> Result<&'a str> {
+        projects::new(ctx, organization_id, name).await
+    }
+
+    async fn new_target<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        project_id: i32,
+        name: String,
+    ) -> Result<&'a str> {
+        targets::new(ctx, project_id, name).await
     }
 }
 
