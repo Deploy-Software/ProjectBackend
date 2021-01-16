@@ -4,6 +4,7 @@ use futures::{stream, Stream};
 
 mod authorization;
 mod organizations;
+mod users;
 
 #[Object]
 impl QueryRoot {
@@ -32,8 +33,17 @@ impl MutationRoot {
         authorization::sign_in(ctx, email, password).await
     }
 
+    async fn add_personal_data<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        name: String,
+        job_title: Option<String>,
+    ) -> Result<&'a str> {
+        users::add_personal_data(ctx, name, job_title).await
+    }
+
     async fn new_organization<'a>(&self, ctx: &'a Context<'_>, name: String) -> Result<&'a str> {
-        organizations::sign_up(ctx, name).await
+        organizations::new(ctx, name).await
     }
 }
 

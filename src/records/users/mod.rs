@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 pub mod password;
+pub mod personal_data;
 pub mod session;
 
 #[derive(sqlx::FromRow, SimpleObject, Debug, Deserialize, Serialize, Clone)]
@@ -16,7 +17,7 @@ pub struct SimpleUser {
 }
 
 impl<'a> SimpleUser {
-    pub async fn from(pg_pool: &PgPool, email: &'a str) -> Result<Self> {
+    pub async fn from_email(pg_pool: &PgPool, email: &'a str) -> Result<Self> {
         match sqlx::query_as!(
             Self,
             "SELECT id, email, date FROM users WHERE email = $1",
@@ -28,6 +29,28 @@ impl<'a> SimpleUser {
             Ok(maybe_user) => match maybe_user {
                 Some(user) => Ok(user),
                 None => Err(Error::from("The email and password combination failed.")),
+            },
+            Err(error) => {
+                println!("{}", error.to_string());
+                Err(Error::from(
+                    "An error occured while retrieving the user from the database.",
+                ))
+            }
+        }
+    }
+
+    pub async fn from_session_token(pg_pool: &PgPool, session_token: &'a str) -> Result<Self> {
+        match sqlx::query_as!(
+            Self,
+            "SELECT users.id, users.email, users.date FROM users INNER JOIN user_sessions ON users.id = user_sessions.user_id WHERE user_sessions.token = $1",
+            session_token
+        )
+        .fetch_optional(pg_pool)
+        .await
+        {
+            Ok(maybe_user) => match maybe_user {
+                Some(user) => Ok(user),
+                None => Err(Error::from("The user session doesn't exist.")),
             },
             Err(error) => {
                 println!("{}", error.to_string());

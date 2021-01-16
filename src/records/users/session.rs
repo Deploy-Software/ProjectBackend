@@ -16,7 +16,7 @@ impl<'a> NewSession {
     fn generate_token() -> String {
         thread_rng()
             .sample_iter(&Alphanumeric)
-            .take(30)
+            .take(50)
             .map(char::from)
             .collect()
     }

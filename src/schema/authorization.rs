@@ -13,7 +13,7 @@ pub async fn sign_up<'a>(ctx: &'a Context<'_>, email: String, password: String) 
 
 pub async fn sign_in<'a>(ctx: &'a Context<'_>, email: String, password: String) -> Result<String> {
     let pg_pool = ctx.data::<PgPool>()?;
-    let user = SimpleUser::from(&pg_pool, &email).await?;
+    let user = SimpleUser::from_email(&pg_pool, &email).await?;
     if !user.password_matches(&pg_pool, &password).await? {
         return Err(Error::from("The email and password combination failed."));
     }
