@@ -6,6 +6,7 @@ mod authorization;
 mod organizations;
 mod projects;
 mod targets;
+mod tasks;
 mod users;
 
 #[Object]
@@ -75,6 +76,25 @@ impl MutationRoot {
         text: String,
     ) -> Result<&'a str> {
         targets::new_comment(ctx, target_id, text).await
+    }
+
+    async fn new_target_activity<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        target_id: i32,
+        text: String,
+    ) -> Result<&'a str> {
+        targets::new_activity(ctx, target_id, text).await
+    }
+
+    async fn new_task<'a>(
+        &self,
+        ctx: &'a Context<'_>,
+        target_id: i32,
+        name: String,
+        about: Option<String>,
+    ) -> Result<&'a str> {
+        tasks::new(ctx, target_id, name, about).await
     }
 }
 

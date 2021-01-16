@@ -118,3 +118,42 @@ impl<'a> NewComment<'a> {
         }
     }
 }
+
+#[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
+pub struct NewActivity<'a> {
+    target_id: i32,
+    text: &'a str,
+    created_by: i32,
+}
+
+impl<'a> NewActivity<'a> {
+    pub fn make(target_id: i32, text: &'a str, created_by: i32) -> Result<Self> {
+        if text.len() == 0 {
+            return Err(Error::from("Activity is too short."));
+        }
+
+        Ok(NewActivity {
+            target_id,
+            text,
+            created_by,
+        })
+    }
+
+    pub async fn insert(&self, pg_pool: &PgPool) -> Result<PgDone> {
+        match sqlx::query!(
+            "INSERT INTO target_activity (target_id, text, created_by) VALUES ($1, $2, $3)",
+            &self.target_id,
+            &self.text,
+            self.created_by
+        )
+        .execute(pg_pool)
+        .await
+        {
+            Ok(done) => Ok(done),
+            Err(error) => {
+                println!("{}", error.to_string());
+                Err(Error::from("Unable to insert activity in database."))
+            }
+        }
+    }
+}
