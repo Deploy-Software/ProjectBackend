@@ -1,14 +1,5 @@
-#![forbid(unsafe_code)]
-#![deny(clippy::all)]
-#![deny(clippy::correctness)]
-#![deny(clippy::style)]
-#![deny(clippy::complexity)]
-#![deny(clippy::perf)]
-#![deny(clippy::pedantic)]
-#![deny(clippy::nursery)]
-
-use async_graphql::{Data, Schema};
-use async_graphql_warp::{graphql_subscription_with_data, Response};
+use async_graphql::Schema;
+use async_graphql_warp::Response;
 use sqlx::postgres::PgPool;
 use std::convert::Infallible;
 use std::env;
@@ -32,6 +23,20 @@ pub async fn db_connection() -> Result<PgPool> {
 
 #[tokio::main]
 async fn main() {
+    let static_files = {
+        // Development
+        #[cfg(debug_assertions)]
+        {
+            format!("{}/../client/build", env!("CARGO_MANIFEST_DIR"))
+        }
+
+        // Production
+        #[cfg(not(debug_assertions))]
+        {
+            format!("{}/../client/dist", env!("CARGO_MANIFEST_DIR"))
+        }
+    };
+
     let pg_pool: PgPool = db_connection().await.expect("Database connection failed.");
     sqlx::migrate!()
         .run(&pg_pool)
@@ -42,7 +47,8 @@ async fn main() {
         .data(pg_pool)
         .finish();
 
-    let graphql_post = warp::header::optional::<String>("token")
+    let graphql_post = warp::path("graphql")
+        .and(warp::header::optional::<String>("token"))
         .and(async_graphql_warp::graphql(schema.clone()))
         .and_then(
             |token,
@@ -58,28 +64,18 @@ async fn main() {
             },
         );
 
-    let graphql_playground = warp::path::end()
+    let index = warp::path::end().map(|| routes::respond("/".to_string()));
+    let graphql_playground = warp::path("playground")
         .and(warp::get())
         .map(|| routes::playground());
+    let examples = warp::path("static").and(warp::fs::dir(static_files));
+    let catch_all = warp::path!(String).map(|path| routes::respond(path));
 
-    let routes = graphql_subscription_with_data(
-        schema,
-        Some(|value| {
-            #[derive(serde_derive::Deserialize)]
-            struct Payload {
-                token: String,
-            }
+    let routes = index
+        .or(graphql_playground)
+        .or(graphql_post)
+        .or(examples)
+        .or(catch_all);
 
-            if let Ok(payload) = serde_json::from_value::<Payload>(value) {
-                let mut data = Data::default();
-                data.insert(AuthToken(payload.token));
-                Ok(data)
-            } else {
-                Err("Token is required".into())
-            }
-        }),
-    )
-    .or(graphql_playground)
-    .or(graphql_post);
-    warp::serve(routes).run(([0, 0, 0, 0], 8000)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
