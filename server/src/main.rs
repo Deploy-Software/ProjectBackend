@@ -37,8 +37,6 @@ async fn main() {
         }
     };
 
-    println!("{}", static_files);
-
     let pg_pool: PgPool = db_connection().await.expect("Database connection failed.");
     sqlx::migrate!()
         .run(&pg_pool)

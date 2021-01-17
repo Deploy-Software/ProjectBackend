@@ -31,18 +31,31 @@ impl View for HomeView {
 
         html! {
         <div>
-
-          { nav_bar }
-
-          <span> The button has been clicked: { click_component } times! </span>
-          <button onclick=move|_: web_sys::Event| { store.borrow_mut().msg(&Msg::Click) }>
-            Click me!
-          </button>
-          <div> In this time Ferris has made { click_count } new friends. </div>
-            <svg xmlns="http://www.w3.org/2000/svg">
-              <circle cx="50" cy="50" r="50"/>
-            </svg>
+          <div class="h-screen flex overflow-hidden bg-white">
+            { nav_bar }
+            <main
+              class="flex-1 relative z-0 overflow-y-auto focus:outline-none"
+              tabIndex={0}
+            >
+              <div class="hidden mt-8 mx-8 sm:block">
+                <div>
+                  <h2 class="text-gray-500 text-xs font-medium uppercase tracking-wide">
+                    Targets
+                  </h2>
+                  <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                 </dl>
+                </div>
+                <div class="mt-4">
+                  <h2 class="text-gray-500 text-xs font-medium uppercase tracking-wide">
+                    Work
+                  </h2>
+                  <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                 </dl>
+                </div>
+              </div>
+            </main>
+          </div>
         </div>
-        }
+          }
     }
 }

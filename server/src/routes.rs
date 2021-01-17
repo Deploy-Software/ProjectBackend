@@ -8,7 +8,6 @@ const STATE_PLACEHOLDER: &str = "#INITIAL_STATE_JSON#";
 static INDEX_HTML: &str = include_str!("./index.html");
 
 pub fn respond(path: String) -> Result<Response<String>, Error> {
-    println!("{}", path);
     let app = App::new(1001, path);
     let state = app.store.borrow();
 
